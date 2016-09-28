@@ -3,6 +3,7 @@
 
 import os
 import sys
+import logging
 import sqlite3
 import argparse
 from PIL import Image
@@ -15,8 +16,28 @@ class SQLiteHeaderNotFoundException(Exception):
     pass
 
 
+def clip_init():
+    # TODO: post-commit の設定をしているか確認していない
+    if os.path.exists(".clip/"):
+        return
+
+    if not os.path.exists(".git/hooks/"):
+        raise FileNotFoundError(".git/hooks/")
+
+    os.mkdir(".clip/")
+    logging.info("Created .clip/")
+    print("Created .clip/")
+
+    with open(".git/hooks/post-commit", "a") as f:
+        f.write("\n./clip -h")
+        logging.info("Updated .git/hooks/post-commit")
+        print("Updated .git/hooks/post-commit")
+
+    os.chmod(".git/hooks/post-commit", 0o755)
+
+
 def seek_sqlite_header(data):
-    HEADER = ['0x53', '0x51', '0x4c', '0x69', '0x74', '0x65', '0x20', '0x66', '0x6f', '0x72', '0x6d', '0x61', '0x74', '0x20', '0x33']
+    HEADER = ["0x53", "0x51", "0x4c", "0x69", "0x74", "0x65", "0x20", "0x66", "0x6f", "0x72", "0x6d", "0x61", "0x74", "0x20", "0x33"]
 
     n = 0
     at = 0
@@ -78,9 +99,18 @@ def parser():
 
 def main():
     args = parser()
-    print(args)
-    # extract_db()
-    # extract_illust()
+
+    if args.init:
+        clip_init()
+    elif args.file:
+        print(args.file)
+        # extract_db()
+        # extract_illust()
+        pass
+    else: # コマンド引数がすべて省略されたとき、ヘルプを表示したい
+        sys.exit(1)
+        pass
+
 
 if __name__ == "__main__":
     main()
