@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
 import sys
 import sqlite3
+import argparse
+from PIL import Image
 
 
 OUT_FILE_NAME = "db"
@@ -56,12 +59,28 @@ def extract_illust():
 
         with open(ILLUST_FILE, "wb") as f:
             f.write(cursor.fetchone()[0])
-            print("OK")
+
+
+def parser():
+    parser = argparse.ArgumentParser(description="Clip 1.0")
+
+    parser.add_argument(
+            "-i", "--init",
+            action="store_true",
+            help="Create .clip and update post-commit hook")
+    parser.add_argument(
+            "file",
+            nargs="?",
+            help="CLIP STUDIO file")
+
+    return parser.parse_args()
 
 
 def main():
-    extract_db()
-    extract_illust()
+    args = parser()
+    print(args)
+    # extract_db()
+    # extract_illust()
 
 if __name__ == "__main__":
     main()
