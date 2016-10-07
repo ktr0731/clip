@@ -19,6 +19,7 @@ class SQLiteHeaderNotFoundException(Exception):
 def clip_init():
     # TODO: post-commit の設定をしているか確認していない
     if os.path.exists(".clip/"):
+        print("Already initialized.")
         return
 
     if not os.path.exists(".git/hooks/"):
@@ -78,7 +79,7 @@ def extract_illust():
         cursor = conn.cursor()
         cursor.execute("SELECT ImageData from CanvasPreview")
 
-        with open(ILLUST_FILE, "wb") as f:
+        with open("./.clip/{0}".format(ILLUST_FILE), "wb") as f:
             f.write(cursor.fetchone()[0])
 
 
@@ -90,7 +91,11 @@ def parser():
             action="store_true",
             help="Create .clip and update post-commit hook")
     parser.add_argument(
-            "file",
+            "input-file-name",
+            nargs="?",
+            help="CLIP STUDIO file")
+    parser.add_argument(
+            "output-file-name",
             nargs="?",
             help="CLIP STUDIO file")
 
@@ -103,13 +108,10 @@ def main():
     if args.init:
         clip_init()
     elif args.file:
-        print(args.file)
-        # extract_db()
-        # extract_illust()
-        pass
-    else: # コマンド引数がすべて省略されたとき、ヘルプを表示したい
+        extract_db()
+        extract_illust()
+    else:  # TODO: コマンド引数がすべて省略されたとき、ヘルプを表示したい
         sys.exit(1)
-        pass
 
 
 if __name__ == "__main__":
