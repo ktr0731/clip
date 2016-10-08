@@ -1,24 +1,24 @@
 package main
 
 import (
-  "fmt"
-  "os"
+	"fmt"
+	"os"
 )
 
 func isExists(path string) bool {
-  _, err := os.Stat(path)
+	_, err := os.Stat(path)
 
-  return err == nil
+	return err == nil
 }
 
 func clipInit() {
-  if isExists(".clip/") {
-    fmt.Println("Already initialized.")
+	if isExists(".clip/") {
+		fmt.Println("Already initialized.")
 
-    return
-  }
+		return
+	}
 
-  // if isExists(".git/hooks/") {
-  //
-  // }
+	if !isExists(".git/hooks/") {
+
+	}
 }
