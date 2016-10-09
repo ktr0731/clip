@@ -1,34 +1,28 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	// "log"
 	"os"
+
+	"github.com/urfave/cli"
 )
 
-func isExists(path string) bool {
-	_, err := os.Stat(path)
+func main() {
+	app := cli.NewApp()
+	app.Name = "Clip"
+	app.Usage = "The content track helper for CLIP STUDIO files"
+	app.Flags = []cli.Flag{
+		cli.StringFlag{
+			Name:  "lang, l",
+			Usage: "lang for ..",
+		},
+	}
 
-	return err == nil
-}
-
-func clipInit() error {
-	if isExists(".clip/") {
-		fmt.Println("Already initialized")
-
+	app.Action = func(c *cli.Context) error {
 		return nil
 	}
 
-	if isExists(".git/hooks/") {
-		return fmt.Errorf(".git/hooks/ Not Found")
-	}
+	app.Commands = Commands
 
-	return nil
-}
-
-func main() {
-	err := clipInit()
-	if err != nil {
-		log.Fatal(err)
-	}
+	app.Run(os.Args)
 }
