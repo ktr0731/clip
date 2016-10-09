@@ -17,4 +17,31 @@ var Commands = []cli.Command{
 			return nil
 		},
 	},
+	{
+		Name:    "export",
+		Aliases: []string{"e"},
+		Usage:   "Export an illustration from latest .clip file",
+		Action: func(c *cli.Context) error {
+			fmt.Println("Export")
+			return nil
+		},
+	},
+	{
+		Name:    "clean",
+		Aliases: []string{"c"},
+		Usage:   "Remove not linked illustrations from .clip/",
+		Action: func(c *cli.Context) error {
+			fmt.Println("Clean")
+			return nil
+		},
+	},
+	{
+		Name:    "diff",
+		Aliases: []string{"d"},
+		Usage:   "Show changes between two commits",
+		Action: func(c *cli.Context) error {
+			fmt.Println("Diff")
+			return nil
+		},
+	},
 }
