@@ -6,42 +6,50 @@ import (
 	"github.com/urfave/cli"
 )
 
+func initClip(c *cli.Context) error {
+	fmt.Println("Init")
+	return nil
+}
+
+func export(c *cli.Context) error {
+	fmt.Println("Export")
+	return nil
+}
+
+func clean(c *cli.Context) error {
+	fmt.Println("Clean")
+	return nil
+}
+
+func diff(c *cli.Context) error {
+	fmt.Println("Diff")
+	return nil
+}
+
 // Commands Sub-commands for cli
 var Commands = []cli.Command{
 	{
 		Name:    "init",
 		Aliases: []string{"i"},
 		Usage:   "Create .clip/ and update post-commit hook",
-		Action: func(c *cli.Context) error {
-			fmt.Println("Init!!")
-			return nil
-		},
+		Action:  initClip,
 	},
 	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Usage:   "Export an illustration from latest .clip file",
-		Action: func(c *cli.Context) error {
-			fmt.Println("Export")
-			return nil
-		},
+		Action:  export,
 	},
 	{
 		Name:    "clean",
 		Aliases: []string{"c"},
 		Usage:   "Remove not linked illustrations from .clip/",
-		Action: func(c *cli.Context) error {
-			fmt.Println("Clean")
-			return nil
-		},
+		Action:  clean,
 	},
 	{
 		Name:    "diff",
 		Aliases: []string{"d"},
 		Usage:   "Show changes between two commits",
-		Action: func(c *cli.Context) error {
-			fmt.Println("Diff")
-			return nil
-		},
+		Action:  diff,
 	},
 }
