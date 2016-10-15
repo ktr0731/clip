@@ -7,7 +7,16 @@ import (
 )
 
 func initClip(c *cli.Context) error {
-	fmt.Println("Init")
+	if IsExists(".clip/") {
+		fmt.Println("Already initialized")
+
+		return nil
+	}
+
+	if !IsExists(".git/hooks/") {
+		return fmt.Errorf(".git/hooks/ Not Found")
+	}
+
 	return nil
 }
 
