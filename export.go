@@ -1,10 +1,12 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"io/ioutil"
 	"os"
 
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/urfave/cli"
 )
 
@@ -43,15 +45,47 @@ func extractSQLiteDB(fileName string) error {
 	}
 
 	at, err := seekSQLiteHeader(data)
+	if err != nil {
+		return err
+	}
 
 	f, err := os.OpenFile(dbName, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
-
 	defer f.Close()
 
 	f.Write(data[at:])
+
+	return nil
+}
+
+func extractIllustration(dbName string) error {
+	db, err := sql.Open("sqlite3", dbName)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+
+	f, err := os.OpenFile(".clip/image.png", os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	var length int
+	err = db.QueryRow("select length(ImageData) from CanvasPreview").Scan(&length)
+	if err != nil {
+		return err
+	}
+
+	image := make([]byte, length)
+	err = db.QueryRow("select ImageData from CanvasPreview").Scan(&image)
+	if err != nil {
+		return err
+	}
+
+	f.Write(image)
 
 	return nil
 }
@@ -62,5 +96,7 @@ func Export(c *cli.Context) error {
 	fmt.Println("Extract db")
 
 	extractSQLiteDB("sample.clip")
+	extractIllustration("db")
+
 	return nil
 }

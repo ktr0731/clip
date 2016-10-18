@@ -25,13 +25,21 @@ func TestSeekSQLiteHeader(t *testing.T) {
 }
 
 func TestExtractSQLiteDB(t *testing.T) {
-	err := extractSQLiteDB("tests/assets/sample.clip")
-	if err != nil {
+	if err := extractSQLiteDB("tests/assets/sample.clip"); err != nil {
 		t.Error(err)
 	}
 
 	if err := os.Remove("db"); err != nil {
 		t.Error(err)
 	}
+}
 
+func TestExtractIllustration(t *testing.T) {
+	if err := extractIllustration("tests/assets/db"); err != nil {
+		t.Error(err)
+	}
+
+	if err := os.Remove(".clip/image.png"); err != nil {
+		t.Error(err)
+	}
 }
