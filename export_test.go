@@ -35,11 +35,20 @@ func TestExtractSQLiteDB(t *testing.T) {
 }
 
 func TestExtractIllustration(t *testing.T) {
+	// TODO: きたない
+	if err := os.Mkdir(".clip", 0755); err != nil {
+		t.Error(err)
+	}
+
 	if err := extractIllustration("tests/assets/db"); err != nil {
 		t.Error(err)
 	}
 
 	if err := os.Remove(".clip/image.png"); err != nil {
+		t.Error(err)
+	}
+
+	if err := os.Remove(".clip"); err != nil {
 		t.Error(err)
 	}
 }
