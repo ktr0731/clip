@@ -2,6 +2,7 @@ package main
 
 import (
 	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -28,4 +29,9 @@ func TestExtractSQLiteDB(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	if err := os.Remove("db"); err != nil {
+		t.Error(err)
+	}
+
 }
