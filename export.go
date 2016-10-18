@@ -34,20 +34,22 @@ func seekSQLiteHeader(data []byte) (int, error) {
 	return -1, fmt.Errorf("SQLite header not found")
 }
 
-func extractSQLiteDB() error {
-	fileName, dbName := "sample.clip", "db"
+func extractSQLiteDB(fileName string) error {
+	dbName := "db"
 
 	data, err := ioutil.ReadFile(fileName)
 	if err != nil {
-		return fmt.Errorf("Cannot open sample.clip")
+		return err
 	}
 
 	at, err := seekSQLiteHeader(data)
 
-	f, err := os.OpenFile(dbName, os.O_RDONLY, 0644)
+	f, err := os.OpenFile(dbName, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		return fmt.Errorf("Cannot open db")
+		return err
 	}
+
+	defer f.Close()
 
 	f.Write(data[at:])
 
@@ -59,6 +61,6 @@ func Export(c *cli.Context) error {
 	fmt.Println("Export")
 	fmt.Println("Extract db")
 
-	extractSQLiteDB()
+	extractSQLiteDB("sample.clip")
 	return nil
 }

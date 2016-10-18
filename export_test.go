@@ -22,3 +22,10 @@ func TestSeekSQLiteHeader(t *testing.T) {
 		t.Errorf("Expect: %d, Actual: %d", expect, actual)
 	}
 }
+
+func TestExtractSQLiteDB(t *testing.T) {
+	err := extractSQLiteDB("tests/assets/sample.clip")
+	if err != nil {
+		t.Error(err)
+	}
+}

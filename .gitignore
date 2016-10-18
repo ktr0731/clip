@@ -28,3 +28,4 @@ _testmain.go
 # Project
 .DS_Store
 .clip
+tmp
