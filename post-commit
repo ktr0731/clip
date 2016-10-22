@@ -1,0 +1,3 @@
+# Clip https://github.com/lycoris0731/clip
+NAME=`git log -1 HEAD | head -1 | tr -d 'commit '`
+clip export $NAME

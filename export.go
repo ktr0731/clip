@@ -7,6 +7,7 @@ import (
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/skratchdot/open-golang/open"
 	"github.com/urfave/cli"
 )
 
@@ -38,6 +39,10 @@ func seekSQLiteHeader(data []byte) (int, error) {
 
 func extractSQLiteDB(fileName string) error {
 	dbName := "db"
+
+	if !IsExists(fileName) {
+		return fmt.Errorf("%s: no such file", fileName)
+	}
 
 	data, err := ioutil.ReadFile(fileName)
 	if err != nil {
@@ -92,11 +97,27 @@ func extractIllustration(dbName string) error {
 
 // Export create image file from CLIP STUDIO file
 func Export(c *cli.Context) error {
-	fmt.Println("Export")
-	fmt.Println("Extract db")
+	if c.NArg() != 1 {
+		fmt.Println("Usage: clip export FILE_NAME")
+		os.Exit(1)
+	}
 
-	extractSQLiteDB("sample.clip")
-	extractIllustration("db")
+	if err := extractSQLiteDB(c.Args()[0]); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	if err := extractIllustration("db"); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	if err := os.Remove("db"); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	open.Run(".clip/image.png")
 
 	return nil
 }

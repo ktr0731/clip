@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 
 	"github.com/urfave/cli"
@@ -10,9 +11,7 @@ import (
 // InitClip create .clip/ and update post-commit in .git/hooks/
 func InitClip(c *cli.Context) error {
 	if IsExists(".clip/") {
-		fmt.Println("Already initialized")
-
-		return nil
+		return fmt.Errorf("Already initialized")
 	}
 
 	if !IsExists(".git/hooks/") {
@@ -29,7 +28,13 @@ func InitClip(c *cli.Context) error {
 
 	defer f.Close()
 
-	f.WriteString("\nclip -h")
+	data, err := ioutil.ReadFile("post-commit")
+	if err != nil {
+		return err
+	}
+
+	f.Write(data)
+
 	fmt.Println("Updated .git/hooks/post-commit")
 
 	os.Chmod(".git/hooks/post-commit", 0755)
