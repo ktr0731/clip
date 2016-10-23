@@ -11,6 +11,8 @@ import (
 	"github.com/urfave/cli"
 )
 
+const dbName = "db"
+
 func seekSQLiteHeader(data []byte) (int, error) {
 	header := []byte{
 		0x53, 0x51, 0x4c, 0x69, 0x74, 0x65, 0x20, 0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x20, 0x33,
@@ -38,8 +40,6 @@ func seekSQLiteHeader(data []byte) (int, error) {
 }
 
 func extractSQLiteDB(fileName string) error {
-	dbName := "db"
-
 	if !IsExists(fileName) {
 		return fmt.Errorf("%s: no such file", fileName)
 	}
@@ -65,14 +65,14 @@ func extractSQLiteDB(fileName string) error {
 	return nil
 }
 
-func extractIllustration(dbName string) error {
+func extractIllustration(illustName string) error {
 	db, err := sql.Open("sqlite3", dbName)
 	if err != nil {
 		return err
 	}
 	defer db.Close()
 
-	f, err := os.OpenFile(".clip/image.png", os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(fmt.Sprintf(".clip/%s.png", illustName), os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
@@ -107,17 +107,17 @@ func Export(c *cli.Context) error {
 		os.Exit(1)
 	}
 
-	if err := extractIllustration("db"); err != nil {
+	if err := extractIllustration(c.Args()[1]); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	if err := os.Remove("db"); err != nil {
+	if err := os.Remove(dbName); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	open.Run(".clip/image.png")
+	open.Run(fmt.Sprintf(".clip/%s.png", c.Args()[1]))
 
 	return nil
 }
