@@ -10,12 +10,18 @@ import (
 
 // InitClip create .clip/ and update post-commit in .git/hooks/
 func InitClip(c *cli.Context) error {
+	if c.NArg() != 1 {
+		fmt.Println("Usage: clip init TARGET_FILE")
+		os.Exit(1)
+	}
 	if IsExists(".clip/") {
-		return fmt.Errorf("Already initialized")
+		fmt.Println("Already initialized")
+		os.Exit(1)
 	}
 
 	if !IsExists(".git/hooks/") {
-		return fmt.Errorf(".git/hooks/ Not Found")
+		fmt.Println(".git/hooks/ Not Found")
+		os.Exit(1)
 	}
 
 	os.Mkdir(".clip/", 0755)
@@ -23,17 +29,19 @@ func InitClip(c *cli.Context) error {
 
 	f, err := os.OpenFile(".git/hooks/post-commit", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
-		return fmt.Errorf("Cannot open post-commit")
+		fmt.Println("Cannot open post-commit")
+		os.Exit(1)
 	}
 
 	defer f.Close()
 
 	data, err := ioutil.ReadFile("post-commit")
 	if err != nil {
-		return err
+		fmt.Println("Cannot read post-commit text")
+		os.Exit(1)
 	}
 
-	f.Write(data)
+	f.WriteString(fmt.Sprintf(string(data), c.Args()[0]))
 
 	fmt.Println("Updated .git/hooks/post-commit")
 

@@ -97,8 +97,8 @@ func extractIllustration(dbName string) error {
 
 // Export create image file from CLIP STUDIO file
 func Export(c *cli.Context) error {
-	if c.NArg() != 1 {
-		fmt.Println("Usage: clip export FILE_NAME")
+	if c.NArg() != 2 {
+		fmt.Println("Usage: clip export CLIP_STUDIO_FILE IMG_NAME")
 		os.Exit(1)
 	}
 
