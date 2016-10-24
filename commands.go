@@ -23,9 +23,9 @@ var Commands = []cli.Command{
 		Action:  Clean,
 	},
 	{
-		Name:    "diff",
-		Aliases: []string{"d"},
-		Usage:   "Show changes between two commits",
-		Action:  Diff,
+		Name:    "show",
+		Aliases: []string{"s"},
+		Usage:   "Show illustrations from commit hashes",
+		Action:  Show,
 	},
 }

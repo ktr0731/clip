@@ -38,7 +38,6 @@ func TestExtractSQLiteDB(t *testing.T) {
 func TestExtractIllustration(t *testing.T) {
 	const illustName string = "test"
 
-	// TODO: きたない
 	if err := os.Mkdir(".clip", 0755); err != nil {
 		t.Error(err)
 	}
@@ -51,11 +50,15 @@ func TestExtractIllustration(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := os.Remove(fmt.Sprintf(".clip/%s.png", illustName)); err != nil {
+	if err := os.Remove(fmt.Sprintf(".clip/%s", illustName)); err != nil {
 		t.Error(err)
 	}
 
 	if err := os.Remove(".clip"); err != nil {
+		t.Error(err)
+	}
+
+	if err := os.Remove("db"); err != nil {
 		t.Error(err)
 	}
 }

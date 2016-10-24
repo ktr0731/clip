@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 
 	"github.com/urfave/cli"
@@ -35,11 +34,9 @@ func InitClip(c *cli.Context) error {
 
 	defer f.Close()
 
-	data, err := ioutil.ReadFile("post-commit")
-	if err != nil {
-		fmt.Println("Cannot read post-commit text")
-		os.Exit(1)
-	}
+	data := `# Clip https://github.com/lycoris0731/clip
+NAME=$(git log -1 HEAD | head -1 | sed -e 's/commit //g')
+clip export %s $NAME`
 
 	f.WriteString(fmt.Sprintf(string(data), c.Args()[0]))
 

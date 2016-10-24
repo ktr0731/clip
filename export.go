@@ -7,7 +7,6 @@ import (
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/skratchdot/open-golang/open"
 	"github.com/urfave/cli"
 )
 
@@ -72,7 +71,7 @@ func extractIllustration(illustName string) error {
 	}
 	defer db.Close()
 
-	f, err := os.OpenFile(fmt.Sprintf(".clip/%s.png", illustName), os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(fmt.Sprintf(".clip/%s", illustName), os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
@@ -102,6 +101,11 @@ func Export(c *cli.Context) error {
 		os.Exit(1)
 	}
 
+	if !IsExists(".clip") {
+		fmt.Println("Directory .clip not found\nPlease do\n\n\tclip init TARGET_FILE\n")
+		os.Exit(1)
+	}
+
 	if err := extractSQLiteDB(c.Args()[0]); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -117,7 +121,7 @@ func Export(c *cli.Context) error {
 		os.Exit(1)
 	}
 
-	open.Run(fmt.Sprintf(".clip/%s.png", c.Args()[1]))
+	// open.Run(fmt.Sprintf(".clip/%s", c.Args()[1]))
 
 	return nil
 }
