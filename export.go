@@ -102,8 +102,7 @@ func Export(c *cli.Context) error {
 	}
 
 	if !IsExists(".clip") {
-		fmt.Println("Directory .clip not found\nPlease do\n\n\tclip init TARGET_FILE\n")
-		os.Exit(1)
+		MkClipDir()
 	}
 
 	if err := extractSQLiteDB(c.Args()[0]); err != nil {
