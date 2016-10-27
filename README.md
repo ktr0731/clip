@@ -17,6 +17,10 @@ You can tracking to CLIP STUDIO PAINT files by Git by using this.
 $ go get github.com/lycoris0731/clip
 ```
 
+## Recommendation
+You **should** use Git LFS(Large File Storage) to track clip files.  
+Because Git managing binary files by whole save files of each commits.  
+
 ## Usage
 First, you should run below command in Git repository.
 ``` sh
