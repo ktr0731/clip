@@ -9,7 +9,7 @@ import (
 )
 
 // Show illustrations from commit hashes
-func Show(c *cli.Context) error {
+func Show(c *cli.Context) {
 	if c.NArg() > 0 {
 		for _, hash := range c.Args() {
 			if IsExists(fmt.Sprintf(".clip/%s", hash)) {
@@ -22,6 +22,4 @@ func Show(c *cli.Context) error {
 	} else {
 		fmt.Println("Usage: clip show [commit-hash ...]")
 	}
-
-	return nil
 }

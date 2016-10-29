@@ -8,13 +8,11 @@ import (
 )
 
 // Clean remove some unnecessary files in .clip/
-func Clean(c *cli.Context) error {
+func Clean(c *cli.Context) {
 	if err := os.RemoveAll(".clip"); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	} else {
 		fmt.Println("Delete .clip/")
 	}
-
-	return nil
 }

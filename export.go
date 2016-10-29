@@ -94,33 +94,37 @@ func extractIllustration(illustName string) error {
 	return nil
 }
 
+// ExportPicture create picture from CLIP STUDIO file
+func ExportPicture(clipFileName string, outputFileName string) error {
+	if !IsExists(".clip") {
+		MkClipDir()
+	}
+
+	if err := extractSQLiteDB(clipFileName); err != nil {
+		return err
+	}
+
+	if err := extractIllustration(outputFileName); err != nil {
+		return err
+	}
+
+	if err := os.Remove(dbName); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Export create image file from CLIP STUDIO file
-func Export(c *cli.Context) error {
+func Export(c *cli.Context) {
 	if c.NArg() != 2 {
 		fmt.Println("Usage: clip export CLIP_STUDIO_FILE IMG_NAME")
 		os.Exit(1)
 	}
 
-	if !IsExists(".clip") {
-		MkClipDir()
-	}
-
-	if err := extractSQLiteDB(c.Args()[0]); err != nil {
+	err := ExportPicture(c.Args()[0], c.Args()[1])
+	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
-	if err := extractIllustration(c.Args()[1]); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	if err := os.Remove(dbName); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	// open.Run(fmt.Sprintf(".clip/%s", c.Args()[1]))
-
-	return nil
 }

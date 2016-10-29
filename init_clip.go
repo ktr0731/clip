@@ -8,7 +8,7 @@ import (
 )
 
 // InitClip create .clip/ and update post-commit in .git/hooks/
-func InitClip(c *cli.Context) error {
+func InitClip(c *cli.Context) {
 	if c.NArg() != 1 {
 		fmt.Println("Usage: clip init TARGET_FILE")
 		os.Exit(1)
@@ -49,6 +49,4 @@ clip export %s $NAME`
 	fmt.Println("Updated .gitignore")
 
 	os.Chmod(".git/hooks/post-commit", 0755)
-
-	return nil
 }

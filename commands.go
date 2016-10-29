@@ -28,4 +28,26 @@ var Commands = []cli.Command{
 		Usage:   "Show illustrations from commit hashes",
 		Action:  Show,
 	},
+	{
+		Name:    "gif",
+		Aliases: []string{"g"},
+		Usage:   "Generate Gif of the production process",
+		Action:  Gif,
+		Flags: []cli.Flag{
+			cli.StringFlag{
+				Name:  "output, o",
+				Value: "process.gif",
+				Usage: "Output file `name`",
+			},
+			cli.IntFlag{
+				Name:  "delay, d",
+				Value: 1000,
+				Usage: "Delay `time` (ms)",
+			},
+			cli.BoolFlag{
+				Name:  "all",
+				Usage: "Create pictures if there is no picture corresponding to commits",
+			},
+		},
+	},
 }
