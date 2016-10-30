@@ -7,8 +7,6 @@ import (
 	"image/gif"
 	"image/png"
 	"os"
-	"os/exec"
-	"strings"
 
 	"github.com/urfave/cli"
 )
@@ -23,11 +21,6 @@ func reverse(s []string) []string {
 }
 
 func generate(name string, delay int, all bool) error {
-	result, err := exec.Command("git", "rev-list", "--all").Output()
-	if err != nil {
-		return err
-	}
-
 	if delay < 0 {
 		return fmt.Errorf("Invalid delay time")
 	}
@@ -35,19 +28,27 @@ func generate(name string, delay int, all bool) error {
 	output := &gif.GIF{}
 	path := ".clip/%s"
 
-	tmp := strings.Split(string(result), "\n")
-	tmp = tmp[:len(tmp)-1]
+	// if all {
+	// 	// TODO: Implement a function to generate a picture from a old commit
+	// 	// ExportPicture()
+	// } else {
+	// 	hashes, err := PickValidCommits()
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
 
-	hashes := reverse(tmp)
+	hashes, err := PickValidCommits()
+	if err != nil {
+		return err
+	}
 
-	for _, hash := range hashes {
+	for i, hash := range hashes {
+		fmt.Printf("Generating... %d %%\r", int(float32(i)/float32(len(hashes))*100))
+
 		f, err := os.OpenFile(fmt.Sprintf(path, hash), os.O_RDONLY, 0600)
 		if err != nil {
-			if all {
-				// return err
-			} else {
-				continue
-			}
+			return err
 		}
 
 		buf := bytes.Buffer{}
@@ -68,6 +69,8 @@ func generate(name string, delay int, all bool) error {
 		output.Image = append(output.Image, input.(*image.Paletted))
 		output.Delay = append(output.Delay, delay/10)
 	}
+
+	fmt.Println("Generating... done!")
 
 	f, _ := os.OpenFile(name, os.O_CREATE|os.O_WRONLY, 0600)
 	defer f.Close()

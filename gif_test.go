@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"os"
+	"testing"
+)
 
 func TestReverse(t *testing.T) {
 	actual := []string{"Makise", "Kurisu", "ha", "kawaii"}
@@ -12,7 +15,11 @@ func TestReverse(t *testing.T) {
 }
 
 func TestGenerate(t *testing.T) {
-	if err := generate(); err != nil {
+	if err := generate("process.gif", 100, false); err != nil {
+		t.Error(err)
+	}
+
+	if err := os.Remove("process.gif"); err != nil {
 		t.Error(err)
 	}
 }

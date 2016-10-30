@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -38,8 +37,10 @@ func TestExtractSQLiteDB(t *testing.T) {
 func TestExtractIllustration(t *testing.T) {
 	const illustName string = "test"
 
-	if err := os.Mkdir(".clip", 0755); err != nil {
-		t.Error(err)
+	if !IsExists(".clip") {
+		if err := os.Mkdir(".clip", 0755); err != nil {
+			t.Error(err)
+		}
 	}
 
 	if err := extractSQLiteDB("tests/assets/sample.clip"); err != nil {
@@ -50,11 +51,7 @@ func TestExtractIllustration(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := os.Remove(fmt.Sprintf(".clip/%s", illustName)); err != nil {
-		t.Error(err)
-	}
-
-	if err := os.Remove(".clip"); err != nil {
+	if err := os.RemoveAll(".clip"); err != nil {
 		t.Error(err)
 	}
 

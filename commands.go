@@ -46,7 +46,7 @@ var Commands = []cli.Command{
 			},
 			cli.BoolFlag{
 				Name:  "all",
-				Usage: "Create pictures if there is no picture corresponding to commits",
+				Usage: "Create pictures if there is no picture corresponding to commits (Not yet implemented)",
 			},
 		},
 	},
