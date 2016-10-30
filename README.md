@@ -34,5 +34,10 @@ See the picture at the time of a commit.
 $ clip show [COMMIT_HASH ...]
 ```
 
+You can create a Gif image about the production process.  
+``` sh
+$ clip gif [command options]
+```
+
 ## License
 Please see LICENSE.
