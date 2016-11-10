@@ -15,7 +15,7 @@ func Show(c *cli.Context) {
 			if IsExists(fmt.Sprintf(".clip/%s", hash)) {
 				open.Run(fmt.Sprintf(".clip/%s", hash))
 			} else {
-				fmt.Println("Invalid hash")
+				fmt.Fprintln(os.Stderr, "Invalid hash")
 				os.Exit(1)
 			}
 		}

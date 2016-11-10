@@ -10,22 +10,22 @@ import (
 // InitClip create .clip/ and update post-commit in .git/hooks/
 func InitClip(c *cli.Context) {
 	if c.NArg() != 1 {
-		fmt.Println("Usage: clip init TARGET_FILE")
+		fmt.Fprintln(os.Stderr, "Usage: clip init TARGET_FILE")
 		os.Exit(1)
 	}
 	if IsExists(".clip/") {
-		fmt.Println("Already initialized")
+		fmt.Fprintln(os.Stderr, "Already initialized")
 		os.Exit(1)
 	}
 
 	if !IsExists(".git/hooks/") {
-		fmt.Println(".git/hooks/ Not Found")
+		fmt.Fprintln(os.Stderr, ".git/hooks/ Not Found")
 		os.Exit(1)
 	}
 
 	postCommit, err := os.OpenFile(".git/hooks/post-commit", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
-		fmt.Println("Cannot open post-commit")
+		fmt.Fprintln(os.Stderr, "Cannot open post-commit")
 		os.Exit(1)
 	}
 	defer postCommit.Close()
@@ -40,7 +40,7 @@ clip export %s $NAME`
 
 	gitignore, err := os.OpenFile(".gitignore", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
-		fmt.Println("Cannot open .gitignore")
+		fmt.Fprintln(os.Stderr, "Cannot open .gitignore")
 		os.Exit(1)
 	}
 	defer gitignore.Close()

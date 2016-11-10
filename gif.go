@@ -84,7 +84,7 @@ func generate(name string, delay int, all bool) error {
 func Gif(c *cli.Context) {
 	err := generate(c.String("output"), c.Int("delay"), c.Bool("all"))
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }

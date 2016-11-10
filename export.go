@@ -118,13 +118,13 @@ func ExportPicture(clipFileName string, outputFileName string) error {
 // Export create image file from CLIP STUDIO file
 func Export(c *cli.Context) {
 	if c.NArg() != 2 {
-		fmt.Println("Usage: clip export CLIP_STUDIO_FILE IMG_NAME")
+		fmt.Fprintln(os.Stderr, "Usage: clip export CLIP_STUDIO_FILE IMG_NAME")
 		os.Exit(1)
 	}
 
 	err := ExportPicture(c.Args()[0], c.Args()[1])
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
