@@ -6,6 +6,7 @@ import (
 	"image"
 	"image/gif"
 	"image/png"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -31,6 +32,13 @@ func generate(name string, delay int, all bool) error {
 	path := ".clip/%s"
 
 	if all {
+		_target, err := ioutil.ReadFile(".clipconfig")
+		if err != nil {
+			return err
+		}
+
+		target := string(_target)
+
 		result, err := exec.Command("git", "rev-list", "--all").Output()
 		if err != nil {
 			return err
@@ -38,17 +46,10 @@ func generate(name string, delay int, all bool) error {
 
 		for _, hash := range strings.Split(string(result), "\n") {
 			if !IsExists(fmt.Sprintf("./clip/%s", hash)) {
-				ExportPicture("", hash) // TODO: ファイル名の保存
+				ExportPicture(target, hash)
 			}
 		}
-		// TODO: Implement a function to generate a picture from a old commit
-		// ExportPicture()
-	} // else {
-	// 	hashes, err := PickValidCommits()
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
+	}
 
 	hashes, err := PickValidCommits()
 	if err != nil {
