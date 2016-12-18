@@ -38,6 +38,15 @@ clip export %s $NAME`
 
 	fmt.Println("Updated .git/hooks/post-commit")
 
+	clipconfig, err := os.OpenFile(".clipconfig", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Cannot open .clipconfig")
+		os.Exit(1)
+	}
+	defer clipconfig.Close()
+
+	clipconfig.WriteString(c.Args()[0])
+
 	gitignore, err := os.OpenFile(".gitignore", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Cannot open .gitignore")

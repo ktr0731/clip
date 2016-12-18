@@ -36,7 +36,7 @@ func generate(name string, delay int, all bool) error {
 			return err
 		}
 
-		for _, hash := range strings.split(string(result), "\n") {
+		for _, hash := range strings.Split(string(result), "\n") {
 			if !IsExists(fmt.Sprintf("./clip/%s", hash)) {
 				ExportPicture("", hash) // TODO: ファイル名の保存
 			}
