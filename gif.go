@@ -7,6 +7,8 @@ import (
 	"image/gif"
 	"image/png"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/urfave/cli"
 )
@@ -28,10 +30,20 @@ func generate(name string, delay int, all bool) error {
 	output := &gif.GIF{}
 	path := ".clip/%s"
 
-	// if all {
-	// 	// TODO: Implement a function to generate a picture from a old commit
-	// 	// ExportPicture()
-	// } else {
+	if all {
+		result, err := exec.Command("git", "rev-list", "--all").Output()
+		if err != nil {
+			return err
+		}
+
+		for _, hash := range strings.split(string(result), "\n") {
+			if !IsExists(fmt.Sprintf("./clip/%s", hash)) {
+				ExportPicture("", hash) // TODO: ファイル名の保存
+			}
+		}
+		// TODO: Implement a function to generate a picture from a old commit
+		// ExportPicture()
+	} // else {
 	// 	hashes, err := PickValidCommits()
 	// 	if err != nil {
 	// 		return err
