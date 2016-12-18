@@ -37,7 +37,7 @@ func generate(name string, delay int, all bool) error {
 			return err
 		}
 
-		target := string(_target)
+		target := strings.TrimSpace(string(_target))
 
 		result, err := exec.Command("git", "rev-list", "--all").Output()
 		if err != nil {
@@ -45,7 +45,7 @@ func generate(name string, delay int, all bool) error {
 		}
 
 		for _, hash := range strings.Split(string(result), "\n") {
-			if !IsExists(fmt.Sprintf("./clip/%s", hash)) {
+			if !IsExists(fmt.Sprintf(path, hash)) {
 				ExportPicture(target, hash)
 			}
 		}
