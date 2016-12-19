@@ -44,9 +44,13 @@ func generate(name string, delay int, all bool) error {
 			return err
 		}
 
+		fmt.Println("Target:" + target)
 		for _, hash := range strings.Split(string(result), "\n") {
 			if !IsExists(fmt.Sprintf(path, hash)) {
-				ExportPicture(target, hash)
+				err := ExportPicture(target, hash)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
