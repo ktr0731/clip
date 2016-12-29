@@ -98,10 +98,6 @@ func generate(name string, delay int, all bool) error {
 }
 
 // Gif generate gif from all pictures
-func Gif(c *cli.Context) {
-	err := generate(c.String("output"), c.Int("delay"), c.Bool("all"))
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+func Gif(c *cli.Context) error {
+	return generate(c.String("output"), c.Int("delay"), c.Bool("all"))
 }

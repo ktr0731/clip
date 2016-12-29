@@ -116,15 +116,10 @@ func ExportPicture(clipFileName string, outputFileName string) error {
 }
 
 // Export create image file from CLIP STUDIO file
-func Export(c *cli.Context) {
+func Export(c *cli.Context) error {
 	if c.NArg() != 2 {
-		fmt.Fprintln(os.Stderr, "Usage: clip export CLIP_STUDIO_FILE IMG_NAME")
-		os.Exit(1)
+		return fmt.Errorf("Usage: clip export CLIP_STUDIO_FILE IMG_NAME")
 	}
 
-	err := ExportPicture(c.Args()[0], c.Args()[1])
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
+	return ExportPicture(c.Args()[0], c.Args()[1])
 }
