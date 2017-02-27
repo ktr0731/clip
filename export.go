@@ -7,10 +7,51 @@ import (
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/urfave/cli"
 )
 
 const dbName = "db"
+
+// ExportCommand creates image file from CLIP STUDIO file
+type ExportCommand struct{}
+
+func (c *ExportCommand) Synopsis() string {
+	return "Export an illustration from latest .clip file"
+}
+
+func (c *ExportCommand) Help() string {
+	return "Usage: clip export CLIP_STUDIO_FILE IMG_NAME"
+}
+
+func (c *ExportCommand) Run(args []string) int {
+	if len(args) != 2 {
+		fmt.Fprintln(os.Stderr, c.Help())
+		return 1
+	}
+
+	clipFileName := args[0]
+	outputFileName := args[1]
+
+	if !isExists(".clip") {
+		mkClipDir()
+	}
+
+	if err := extractSQLiteDB(clipFileName); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 1
+	}
+
+	if err := extractIllustration(outputFileName); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 1
+	}
+
+	if err := os.Remove(dbName); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 1
+	}
+
+	return 0
+}
 
 func seekSQLiteHeader(data []byte) (int, error) {
 	header := []byte{
@@ -92,33 +133,4 @@ func extractIllustration(illustName string) error {
 	f.Write(image)
 
 	return nil
-}
-
-func exportPicture(clipFileName string, outputFileName string) error {
-	if !isExists(".clip") {
-		mkClipDir()
-	}
-
-	if err := extractSQLiteDB(clipFileName); err != nil {
-		return err
-	}
-
-	if err := extractIllustration(outputFileName); err != nil {
-		return err
-	}
-
-	if err := os.Remove(dbName); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// export creates image file from CLIP STUDIO file
-func export(c *cli.Context) error {
-	if c.NArg() != 2 {
-		return fmt.Errorf("Usage: clip export CLIP_STUDIO_FILE IMG_NAME")
-	}
-
-	return exportPicture(c.Args()[0], c.Args()[1])
 }

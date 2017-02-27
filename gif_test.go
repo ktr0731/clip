@@ -15,8 +15,9 @@ func TestReverse(t *testing.T) {
 }
 
 func TestGenerate(t *testing.T) {
-	if err := generate("process.gif", 100, false); err != nil {
-		t.Error(err)
+	generate := &GifCommand{}
+	if status := generate.Run([]string{}); status != 0 {
+		t.Error("exit with 1")
 	}
 
 	if err := os.Remove("process.gif"); err != nil {

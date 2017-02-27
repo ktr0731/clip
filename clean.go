@@ -3,17 +3,26 @@ package main
 import (
 	"fmt"
 	"os"
-
-	"github.com/urfave/cli"
 )
 
-// clean removes some unnecessary files within .clip/
-func clean(c *cli.Context) error {
+// CleanCommand removes some unnecessary files within .clip/
+type CleanCommand struct{}
+
+func (c *CleanCommand) Synopsis() string {
+	return "Remove not linked illustrations from .clip/"
+}
+
+func (c *CleanCommand) Help() string {
+	return "Usage: clip clean"
+}
+
+func (c *CleanCommand) Run(args []string) int {
 	if err := os.RemoveAll(".clip"); err != nil {
-		return err
+		fmt.Fprintln(os.Stderr, err)
+		return 1
 	}
 
-	fmt.Println("Delete .clip/")
+	fmt.Println("Deleted .clip/")
 
-	return nil
+	return 0
 }

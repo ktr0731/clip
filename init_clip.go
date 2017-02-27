@@ -3,26 +3,38 @@ package main
 import (
 	"fmt"
 	"os"
-
-	"github.com/urfave/cli"
 )
 
-// initClip creates .clip/ and update post-commit in .git/hooks/
-func initClip(c *cli.Context) error {
-	if c.NArg() != 1 {
-		return fmt.Errorf("Usage: clip init TARGET_FILE")
+// InitCommand creates .clip/ and update post-commit in .git/hooks/
+type InitCommand struct{}
+
+func (c *InitCommand) Synopsis() string {
+	return "Create .clip/ and update post-commit hook"
+}
+
+func (c *InitCommand) Help() string {
+	return "Usage: clip init TARGET_FILE"
+}
+
+func (c *InitCommand) Run(args []string) int {
+	if len(args) != 1 {
+		fmt.Fprintln(os.Stderr, c.Help())
+		return 1
 	}
 	if isExists(".clip/") {
-		return fmt.Errorf("Already initialized")
+		fmt.Fprintln(os.Stderr, "Already initialized")
+		return 1
 	}
 
 	if !isExists(".git/hooks/") {
-		return fmt.Errorf(".git/hooks/ Not Found")
+		fmt.Fprintln(os.Stderr, ".git/hooks/ Not Found")
+		return 1
 	}
 
 	postCommit, err := os.OpenFile(".git/hooks/post-commit", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
-		return fmt.Errorf("Cannot open post-commit: %s", err)
+		fmt.Fprintf(os.Stderr, "Cannot open post-commit: %s\n", err)
+		return 1
 	}
 	defer postCommit.Close()
 
@@ -30,21 +42,23 @@ func initClip(c *cli.Context) error {
 NAME=$(git log -1 HEAD | head -1 | sed -e 's/commit //g')
 clip export %s $NAME`
 
-	postCommit.WriteString(fmt.Sprintf(string(data), c.Args()[0]))
+	postCommit.WriteString(fmt.Sprintf(string(data), args[0]))
 
 	fmt.Println("Updated .git/hooks/post-commit")
 
 	clipconfig, err := os.OpenFile(".clipconfig", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
-		return fmt.Errorf("Cannot open .clipconfig: %s", err)
+		fmt.Fprintf(os.Stderr, "Cannot open .clipconfig: %s\n", err)
+		return 1
 	}
 	defer clipconfig.Close()
 
-	clipconfig.WriteString(c.Args()[0])
+	clipconfig.WriteString(args[0])
 
 	gitignore, err := os.OpenFile(".gitignore", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
-		return fmt.Errorf("Cannot open .gitignore: %s", err)
+		fmt.Fprintf(os.Stderr, "Cannot open .gitignore: %s\n", err)
+		return 1
 	}
 	defer gitignore.Close()
 
@@ -53,5 +67,5 @@ clip export %s $NAME`
 
 	os.Chmod(".git/hooks/post-commit", 0755)
 
-	return nil
+	return 0
 }

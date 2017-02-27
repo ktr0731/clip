@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"image"
 	"image/gif"
@@ -10,22 +11,35 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"github.com/urfave/cli"
 )
 
-func reverse(s []string) []string {
-	result := make([]string, len(s))
-	for i := len(s) - 1; i >= 0; i-- {
-		result[len(s)-i-1] = s[i]
-	}
+// GifCommand generates the gif of the production process from all pictures
+type GifCommand struct{}
 
-	return result
+func (c *GifCommand) Synopsis() string {
+	return "Generate Gif of the production process"
 }
 
-func generate(name string, delay int, all bool) error {
+func (c *GifCommand) Help() string {
+	return "Usage: clip gif"
+}
+
+func (c *GifCommand) Run(args []string) int {
+	var name string
+	var delay int
+	var all bool
+	flags := flag.NewFlagSet("gif", flag.ContinueOnError)
+	flags.StringVar(&name, "output", "process.gif", "Output file name")
+	flags.IntVar(&delay, "delay", 1000, "Delay time (ms)")
+	flags.BoolVar(&all, "all", false, "Create pictures if there is no picture corresponding to commits")
+
+	if err := flags.Parse(args); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 1
+	}
+
 	if delay < 0 {
-		return fmt.Errorf("Invalid delay time")
+		fmt.Fprintln(os.Stderr, "Invalid delay time")
 	}
 
 	output := &gif.GIF{}
@@ -34,22 +48,24 @@ func generate(name string, delay int, all bool) error {
 	if all {
 		_target, err := ioutil.ReadFile(".clipconfig")
 		if err != nil {
-			return err
+			fmt.Fprintln(os.Stderr, err)
+			return 1
 		}
 
 		target := strings.TrimSpace(string(_target))
 
 		result, err := exec.Command("git", "rev-list", "--all").Output()
 		if err != nil {
-			return err
+			fmt.Fprintln(os.Stderr, err)
+			return 1
 		}
 
-		fmt.Println("Target:" + target)
+		export := &ExportCommand{}
 		for _, hash := range strings.Split(string(result), "\n") {
 			if !isExists(fmt.Sprintf(path, hash)) {
-				err := exportPicture(target, hash)
-				if err != nil {
-					return err
+				if status := export.Run([]string{target, hash}); status != 0 {
+					fmt.Fprintln(os.Stderr, err)
+					return 1
 				}
 			}
 		}
@@ -57,7 +73,8 @@ func generate(name string, delay int, all bool) error {
 
 	hashes, err := pickValidCommits()
 	if err != nil {
-		return err
+		fmt.Fprintln(os.Stderr, err)
+		return 1
 	}
 
 	for i, hash := range hashes {
@@ -65,22 +82,26 @@ func generate(name string, delay int, all bool) error {
 
 		f, err := os.OpenFile(fmt.Sprintf(path, hash), os.O_RDONLY, 0600)
 		if err != nil {
-			return err
+			fmt.Fprintln(os.Stderr, err)
+			return 1
 		}
 
 		buf := bytes.Buffer{}
 		tmp, err := png.Decode(f)
 		if err != nil {
-			return err
+			fmt.Fprintln(os.Stderr, err)
+			return 1
 		}
 
 		gif.Encode(&buf, tmp, nil)
 
 		input, err := gif.Decode(&buf)
 		if err != nil {
-			return err
+			fmt.Fprintln(os.Stderr, err)
+			return 1
 		}
 
+		// TODO: 関数に切り出してdefer
 		f.Close()
 
 		output.Image = append(output.Image, input.(*image.Paletted))
@@ -94,10 +115,14 @@ func generate(name string, delay int, all bool) error {
 
 	gif.EncodeAll(f, output)
 
-	return nil
+	return 0
 }
 
-// procGif generates the gif of the production process from all pictures
-func procGif(c *cli.Context) error {
-	return generate(c.String("output"), c.Int("delay"), c.Bool("all"))
+func reverse(s []string) []string {
+	result := make([]string, len(s))
+	for i := len(s) - 1; i >= 0; i-- {
+		result[len(s)-i-1] = s[i]
+	}
+
+	return result
 }

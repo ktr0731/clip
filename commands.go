@@ -1,53 +1,21 @@
 package main
 
-import "github.com/urfave/cli"
+import "github.com/mitchellh/cli"
 
-// Commands Sub-commands for cli
-var Commands = []cli.Command{
-	{
-		Name:    "init",
-		Aliases: []string{"i"},
-		Usage:   "Create .clip/ and update post-commit hook",
-		Action:  initClip,
+var commands = map[string]cli.CommandFactory{
+	"init": func() (cli.Command, error) {
+		return &InitCommand{}, nil
 	},
-	{
-		Name:    "export",
-		Aliases: []string{"e"},
-		Usage:   "Export an illustration from latest .clip file",
-		Action:  export,
+	"export": func() (cli.Command, error) {
+		return &ExportCommand{}, nil
 	},
-	{
-		Name:    "clean",
-		Aliases: []string{"c"},
-		Usage:   "Remove not linked illustrations from .clip/",
-		Action:  clean,
+	"clean": func() (cli.Command, error) {
+		return &CleanCommand{}, nil
 	},
-	{
-		Name:    "show",
-		Aliases: []string{"s"},
-		Usage:   "Show illustrations from commit hashes",
-		Action:  show,
+	"show": func() (cli.Command, error) {
+		return &ShowCommand{}, nil
 	},
-	{
-		Name:    "gif",
-		Aliases: []string{"g"},
-		Usage:   "Generate Gif of the production process",
-		Action:  procGif,
-		Flags: []cli.Flag{
-			cli.StringFlag{
-				Name:  "output, o",
-				Value: "process.gif",
-				Usage: "Output file `name`",
-			},
-			cli.IntFlag{
-				Name:  "delay, d",
-				Value: 1000,
-				Usage: "Delay `time` (ms)",
-			},
-			cli.BoolFlag{
-				Name:  "all",
-				Usage: "Create pictures if there is no picture corresponding to commits (Not yet implemented)",
-			},
-		},
+	"gif": func() (cli.Command, error) {
+		return &GifCommand{}, nil
 	},
 }
