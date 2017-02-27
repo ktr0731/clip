@@ -27,9 +27,9 @@ First, you should run below command in Git repository.
 $ clip init TARGET_FILE_NAME
 ```
 Then, clip creates `.clip` directory and update `post-commit` in Git hooks.  
-All pictures are saved to `.clip`.  
+All images are saved to `.clip`.  
   
-See the picture at the time of a commit.
+See the image at the time of a commit.
 ``` sh
 $ clip show [COMMIT_HASH ...]
 ```

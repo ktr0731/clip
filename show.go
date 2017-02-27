@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/skratchdot/open-golang/open"
 )
@@ -25,6 +27,15 @@ func (c *ShowCommand) Run(args []string) int {
 	}
 
 	for _, hash := range args {
+		if strings.Contains(hash, "HEAD") {
+			bytes, err := exec.Command("git", "rev-parse", hash).Output()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return 1
+			}
+			hash = strings.TrimSpace(string(bytes))
+		}
+
 		if isExists(fmt.Sprintf(".clip/%s", hash)) {
 			open.Run(fmt.Sprintf(".clip/%s", hash))
 		} else {
