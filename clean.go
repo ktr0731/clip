@@ -7,8 +7,8 @@ import (
 	"github.com/urfave/cli"
 )
 
-// Clean remove some unnecessary files in .clip/
-func Clean(c *cli.Context) error {
+// clean removes some unnecessary files within .clip/
+func clean(c *cli.Context) error {
 	if err := os.RemoveAll(".clip"); err != nil {
 		return err
 	}

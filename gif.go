@@ -46,8 +46,8 @@ func generate(name string, delay int, all bool) error {
 
 		fmt.Println("Target:" + target)
 		for _, hash := range strings.Split(string(result), "\n") {
-			if !IsExists(fmt.Sprintf(path, hash)) {
-				err := ExportPicture(target, hash)
+			if !isExists(fmt.Sprintf(path, hash)) {
+				err := exportPicture(target, hash)
 				if err != nil {
 					return err
 				}
@@ -55,7 +55,7 @@ func generate(name string, delay int, all bool) error {
 		}
 	}
 
-	hashes, err := PickValidCommits()
+	hashes, err := pickValidCommits()
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func generate(name string, delay int, all bool) error {
 	return nil
 }
 
-// Gif generate gif from all pictures
-func Gif(c *cli.Context) error {
+// procGif generates the gif of the production process from all pictures
+func procGif(c *cli.Context) error {
 	return generate(c.String("output"), c.Int("delay"), c.Bool("all"))
 }

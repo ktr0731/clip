@@ -7,16 +7,16 @@ import (
 	"github.com/urfave/cli"
 )
 
-// InitClip create .clip/ and update post-commit in .git/hooks/
-func InitClip(c *cli.Context) error {
+// initClip creates .clip/ and update post-commit in .git/hooks/
+func initClip(c *cli.Context) error {
 	if c.NArg() != 1 {
 		return fmt.Errorf("Usage: clip init TARGET_FILE")
 	}
-	if IsExists(".clip/") {
+	if isExists(".clip/") {
 		return fmt.Errorf("Already initialized")
 	}
 
-	if !IsExists(".git/hooks/") {
+	if !isExists(".git/hooks/") {
 		return fmt.Errorf(".git/hooks/ Not Found")
 	}
 

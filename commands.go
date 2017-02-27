@@ -8,31 +8,31 @@ var Commands = []cli.Command{
 		Name:    "init",
 		Aliases: []string{"i"},
 		Usage:   "Create .clip/ and update post-commit hook",
-		Action:  InitClip,
+		Action:  initClip,
 	},
 	{
 		Name:    "export",
 		Aliases: []string{"e"},
 		Usage:   "Export an illustration from latest .clip file",
-		Action:  Export,
+		Action:  export,
 	},
 	{
 		Name:    "clean",
 		Aliases: []string{"c"},
 		Usage:   "Remove not linked illustrations from .clip/",
-		Action:  Clean,
+		Action:  clean,
 	},
 	{
 		Name:    "show",
 		Aliases: []string{"s"},
 		Usage:   "Show illustrations from commit hashes",
-		Action:  Show,
+		Action:  show,
 	},
 	{
 		Name:    "gif",
 		Aliases: []string{"g"},
 		Usage:   "Generate Gif of the production process",
-		Action:  Gif,
+		Action:  procGif,
 		Flags: []cli.Flag{
 			cli.StringFlag{
 				Name:  "output, o",

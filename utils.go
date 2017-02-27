@@ -7,21 +7,21 @@ import (
 	"strings"
 )
 
-// IsExists Check whether the path is exists
-func IsExists(path string) bool {
+// isExists checks whether the path is exists
+func isExists(path string) bool {
 	_, err := os.Stat(path)
 
 	return err == nil
 }
 
-// MkClipDir make .clip directory
-func MkClipDir() {
+// mkClipDir makes .clip directory
+func mkClipDir() {
 	os.Mkdir(".clip/", 0755)
 	fmt.Println("Created .clip")
 }
 
-// PickValidCommits pick all valid commits corresponding to pictures by asc
-func PickValidCommits() ([]string, error) {
+// pickValidCommits picks all valid commits corresponding to pictures by asc
+func pickValidCommits() ([]string, error) {
 	result, err := exec.Command("git", "rev-list", "--all").Output()
 	if err != nil {
 		return nil, err
@@ -31,7 +31,7 @@ func PickValidCommits() ([]string, error) {
 
 	var hashes []string
 	for _, hash := range tmp[:len(tmp)-1] {
-		if IsExists(fmt.Sprintf(".clip/%s", hash)) {
+		if isExists(fmt.Sprintf(".clip/%s", hash)) {
 			hashes = append(hashes, hash)
 		}
 	}

@@ -37,7 +37,7 @@ func TestExtractSQLiteDB(t *testing.T) {
 func TestExtractIllustration(t *testing.T) {
 	const illustName string = "test"
 
-	if !IsExists(".clip") {
+	if !isExists(".clip") {
 		if err := os.Mkdir(".clip", 0755); err != nil {
 			t.Error(err)
 		}

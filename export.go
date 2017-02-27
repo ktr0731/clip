@@ -39,7 +39,7 @@ func seekSQLiteHeader(data []byte) (int, error) {
 }
 
 func extractSQLiteDB(fileName string) error {
-	if !IsExists(fileName) {
+	if !isExists(fileName) {
 		return fmt.Errorf("%s: no such file", fileName)
 	}
 
@@ -94,10 +94,9 @@ func extractIllustration(illustName string) error {
 	return nil
 }
 
-// ExportPicture create picture from CLIP STUDIO file
-func ExportPicture(clipFileName string, outputFileName string) error {
-	if !IsExists(".clip") {
-		MkClipDir()
+func exportPicture(clipFileName string, outputFileName string) error {
+	if !isExists(".clip") {
+		mkClipDir()
 	}
 
 	if err := extractSQLiteDB(clipFileName); err != nil {
@@ -115,11 +114,11 @@ func ExportPicture(clipFileName string, outputFileName string) error {
 	return nil
 }
 
-// Export create image file from CLIP STUDIO file
-func Export(c *cli.Context) error {
+// export creates image file from CLIP STUDIO file
+func export(c *cli.Context) error {
 	if c.NArg() != 2 {
 		return fmt.Errorf("Usage: clip export CLIP_STUDIO_FILE IMG_NAME")
 	}
 
-	return ExportPicture(c.Args()[0], c.Args()[1])
+	return exportPicture(c.Args()[0], c.Args()[1])
 }
