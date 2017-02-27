@@ -10,7 +10,7 @@ Tracking helper for CLIP STUDIO PAINT files by Git
 You can tracking to CLIP STUDIO PAINT files by Git by using this.  
 
 ## Equipments
-- Go v1.7.1
+- Go v1.7.1 or later
 
 ## Installation
 ``` sh
@@ -32,6 +32,10 @@ All images are saved to `.clip`.
 See the image at the time of a commit.
 ``` sh
 $ clip show [COMMIT_HASH ...]
+```
+Also, you can use `HEAD`.  
+``` sh
+$ clip show HEAD~
 ```
 
 You can create a Gif image about the production process.  
