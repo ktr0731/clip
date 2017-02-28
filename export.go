@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
 )
-
-const dbName = "db"
 
 // ExportCommand creates image file from CLIP STUDIO file
 type ExportCommand struct{}
@@ -28,6 +28,13 @@ func (c *ExportCommand) Run(args []string) int {
 		fmt.Fprintln(os.Stderr, c.Help())
 		return 1
 	}
+
+	tempFile, cleanup, err := makeTempFile()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 1
+	}
+	defer cleanup()
 
 	clipFileName := args[0]
 	outputFileName := args[1]
@@ -60,17 +67,12 @@ func (c *ExportCommand) Run(args []string) int {
 		fmt.Fprintln(os.Stderr, err)
 	}
 
-	if err := extractSQLiteDB(f, int64(i), stat.Size()); err != nil {
+	if err := extractSQLiteDB(tempFile, f, int64(i), stat.Size()); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
 
-	if err := extractIllustration(outputFileName); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		return 1
-	}
-
-	if err := os.Remove(dbName); err != nil {
+	if err := extractIllustration(tempFile.Name(), outputFileName); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
@@ -78,7 +80,28 @@ func (c *ExportCommand) Run(args []string) int {
 	return 0
 }
 
+func makeTempFile() (*os.File, func() error, error) {
+	f, err := ioutil.TempFile("", "clip")
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return f, func() error {
+		if err := f.Close(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return err
+		}
+
+		if err := os.Remove(f.Name()); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return err
+		}
+		return nil
+	}, nil
+}
+
 func seekSQLiteHeader(buf io.ByteReader) (int, error) {
+	// TODO: 最初のメタデータからデータ位置を特定したい
 	header := []byte{
 		0x53, 0x51, 0x4c, 0x69, 0x74, 0x65, 0x20, 0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x20, 0x33,
 	}
@@ -111,48 +134,39 @@ func seekSQLiteHeader(buf io.ByteReader) (int, error) {
 	}
 }
 
-func extractSQLiteDB(r io.ReaderAt, at, size int64) error {
+func extractSQLiteDB(f *os.File, r io.ReaderAt, at, size int64) error {
 	data := make([]byte, size)
 	_, err := r.ReadAt(data, at)
 	if err != nil && err != io.EOF {
 		return err
 	}
 
-	fmt.Println(len(data))
-
-	// TODO: ioutil.TempFile 使う
-	f, err := os.OpenFile(dbName, os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
 	f.Write(data)
 
 	return nil
 }
 
-func extractIllustration(illustName string) error {
+func extractIllustration(dbName, illustName string) error {
 	db, err := sql.Open("sqlite3", dbName)
 	if err != nil {
 		return err
 	}
 	defer db.Close()
 
-	f, err := os.OpenFile(fmt.Sprintf(".clip/%s", illustName), os.O_CREATE|os.O_WRONLY, 0644)
+	f, err := os.OpenFile(filepath.Join(".clip", illustName), os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
 	var length int
-	err = db.QueryRow("select length(ImageData) from CanvasPreview").Scan(&length)
+	err = db.QueryRow("SELECT length(ImageData) FROM CanvasPreview").Scan(&length)
 	if err != nil {
 		return err
 	}
 
 	image := make([]byte, length)
-	err = db.QueryRow("select ImageData from CanvasPreview").Scan(&image)
+	err = db.QueryRow("SELECT ImageData FROM CanvasPreview").Scan(&image)
 	if err != nil {
 		return err
 	}
