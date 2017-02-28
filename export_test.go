@@ -29,6 +29,12 @@ func TestSeekSQLiteHeader(t *testing.T) {
 func TestExtractSQLiteDB(t *testing.T) {
 	at := 3494297
 
+	tempFile, cleanup, err := makeTempFile()
+	if err != nil {
+		t.Error(err)
+	}
+	defer cleanup()
+
 	f, err := os.Open("tests/assets/sample.clip")
 	if err != nil {
 		t.Error(err)
@@ -40,11 +46,7 @@ func TestExtractSQLiteDB(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := extractSQLiteDB(f, int64(at), stat.Size()); err != nil {
-		t.Error(err)
-	}
-
-	if err := os.Remove("db"); err != nil {
+	if err := extractSQLiteDB(tempFile, f, int64(at), stat.Size()); err != nil {
 		t.Error(err)
 	}
 }
@@ -52,6 +54,12 @@ func TestExtractSQLiteDB(t *testing.T) {
 func TestExtractIllustration(t *testing.T) {
 	const illustName string = "test"
 	at := 3494297
+
+	tempFile, cleanup, err := makeTempFile()
+	if err != nil {
+		t.Error(err)
+	}
+	defer cleanup()
 
 	if !isExists(".clip") {
 		if err := os.Mkdir(".clip", 0755); err != nil {
@@ -70,19 +78,15 @@ func TestExtractIllustration(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := extractSQLiteDB(f, int64(at), stat.Size()); err != nil {
+	if err := extractSQLiteDB(tempFile, f, int64(at), stat.Size()); err != nil {
 		t.Error(err)
 	}
 
-	if err := extractIllustration(illustName); err != nil {
+	if err := extractIllustration(tempFile.Name(), illustName); err != nil {
 		t.Error(err)
 	}
 
 	if err := os.RemoveAll(".clip"); err != nil {
-		t.Error(err)
-	}
-
-	if err := os.Remove("db"); err != nil {
 		t.Error(err)
 	}
 }
