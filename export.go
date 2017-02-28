@@ -1,9 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"database/sql"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -35,7 +36,31 @@ func (c *ExportCommand) Run(args []string) int {
 		mkClipDir()
 	}
 
-	if err := extractSQLiteDB(clipFileName); err != nil {
+	if !isExists(clipFileName) {
+		fmt.Fprintf(os.Stderr, "%s: no such file\n", clipFileName)
+		return 1
+	}
+
+	f, err := os.Open(clipFileName)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 1
+	}
+	defer f.Close()
+
+	buf := bufio.NewReader(f)
+	i, err := seekSQLiteHeader(buf)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 1
+	}
+
+	stat, err := f.Stat()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
+
+	if err := extractSQLiteDB(f, int64(i), stat.Size()); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
@@ -53,19 +78,26 @@ func (c *ExportCommand) Run(args []string) int {
 	return 0
 }
 
-func seekSQLiteHeader(data []byte) (int, error) {
+func seekSQLiteHeader(buf io.ByteReader) (int, error) {
 	header := []byte{
 		0x53, 0x51, 0x4c, 0x69, 0x74, 0x65, 0x20, 0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x20, 0x33,
 	}
 
-	n, at := 0, 0
+	n, at, i := 0, 0, 0
+	for {
+		b, err := buf.ReadByte()
+		if err == io.EOF {
+			return -1, fmt.Errorf("SQLite header not found")
+		}
 
-	for i := range data {
-		if data[i] == header[n] {
+		if err != nil {
+			return -1, err
+		}
+
+		if b == header[n] {
 			if n == 0 {
 				at = i
 			}
-
 			n++
 		} else if n > 0 {
 			n = 0
@@ -74,33 +106,28 @@ func seekSQLiteHeader(data []byte) (int, error) {
 		if n == len(header) {
 			return at, nil
 		}
-	}
 
-	return -1, fmt.Errorf("SQLite header not found")
+		i++
+	}
 }
 
-func extractSQLiteDB(fileName string) error {
-	if !isExists(fileName) {
-		return fmt.Errorf("%s: no such file", fileName)
-	}
-
-	data, err := ioutil.ReadFile(fileName)
-	if err != nil {
+func extractSQLiteDB(r io.ReaderAt, at, size int64) error {
+	data := make([]byte, size)
+	_, err := r.ReadAt(data, at)
+	if err != nil && err != io.EOF {
 		return err
 	}
 
-	at, err := seekSQLiteHeader(data)
-	if err != nil {
-		return err
-	}
+	fmt.Println(len(data))
 
+	// TODO: ioutil.TempFile 使う
 	f, err := os.OpenFile(dbName, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	f.Write(data[at:])
+	f.Write(data)
 
 	return nil
 }

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"bufio"
 	"os"
 	"testing"
 )
@@ -9,10 +9,12 @@ import (
 func TestSeekSQLiteHeader(t *testing.T) {
 	expect := 3494297
 
-	data, err := ioutil.ReadFile("tests/assets/sample.clip")
+	f, err := os.Open("tests/assets/sample.clip")
 	if err != nil {
 		t.Error(err)
 	}
+
+	data := bufio.NewReader(f)
 
 	actual, err := seekSQLiteHeader(data)
 	if err != nil {
@@ -25,7 +27,20 @@ func TestSeekSQLiteHeader(t *testing.T) {
 }
 
 func TestExtractSQLiteDB(t *testing.T) {
-	if err := extractSQLiteDB("tests/assets/sample.clip"); err != nil {
+	at := 3494297
+
+	f, err := os.Open("tests/assets/sample.clip")
+	if err != nil {
+		t.Error(err)
+	}
+	defer f.Close()
+
+	stat, err := f.Stat()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if err := extractSQLiteDB(f, int64(at), stat.Size()); err != nil {
 		t.Error(err)
 	}
 
@@ -36,6 +51,7 @@ func TestExtractSQLiteDB(t *testing.T) {
 
 func TestExtractIllustration(t *testing.T) {
 	const illustName string = "test"
+	at := 3494297
 
 	if !isExists(".clip") {
 		if err := os.Mkdir(".clip", 0755); err != nil {
@@ -43,7 +59,18 @@ func TestExtractIllustration(t *testing.T) {
 		}
 	}
 
-	if err := extractSQLiteDB("tests/assets/sample.clip"); err != nil {
+	f, err := os.Open("tests/assets/sample.clip")
+	if err != nil {
+		t.Error(err)
+	}
+	defer f.Close()
+
+	stat, err := f.Stat()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if err := extractSQLiteDB(f, int64(at), stat.Size()); err != nil {
 		t.Error(err)
 	}
 
