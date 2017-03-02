@@ -37,8 +37,12 @@ func pickValidCommits() ([]string, error) {
 
 	tmp := strings.Split(string(result), "\n")
 
-	var hashes []string
-	for _, hash := range tmp[:len(tmp)-1] {
+	hashes := make([]string, len(tmp))
+	for _, hash := range tmp[:len(tmp)] {
+		if hash == "" {
+			continue
+		}
+
 		if isExists(filepath.Join(".clip", hash)) {
 			hashes = append(hashes, hash)
 		}

@@ -34,6 +34,12 @@ func (c *GifCommand) Run(args []string) int {
 	flags.IntVar(&delay, "delay", 1000, "Delay time (ms)")
 	flags.BoolVar(&all, "all", false, "Create pictures if there is no picture corresponding to commits")
 
+	// TODO: Specify the dir by flag
+	var dir string
+	if len(args) > 0 && args[0] != "" {
+		dir = args[0]
+	}
+
 	if err := flags.Parse(args); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 1
@@ -44,8 +50,7 @@ func (c *GifCommand) Run(args []string) int {
 		return 1
 	}
 
-	output := &gif.GIF{}
-
+	// Generate images which is not generated yet, but committed
 	if all {
 		_target, err := ioutil.ReadFile(".clipconfig")
 		if err != nil {
@@ -63,11 +68,13 @@ func (c *GifCommand) Run(args []string) int {
 
 		export := &ExportCommand{}
 		for _, hash := range strings.Split(string(result), "\n") {
-			if !isExists(filepath.Join(".clip", hash)) {
-				if status := export.Run([]string{target, hash}); status != 0 {
-					fmt.Fprintln(os.Stderr, err)
-					return 1
-				}
+			if isExists(filepath.Join(dir, hash)) {
+				continue
+			}
+
+			if status := export.Run([]string{target, hash}); status != 0 {
+				fmt.Fprintf(os.Stderr, "cannot export %s@%s\n", target, hash)
+				return 1
 			}
 		}
 	}
@@ -78,28 +85,40 @@ func (c *GifCommand) Run(args []string) int {
 		return 1
 	}
 
+	out, _ := os.OpenFile(name, os.O_CREATE|os.O_WRONLY, 0600)
+	defer out.Close()
+
+	generated, err := generate(hashes, delay)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 1
+	}
+	gif.EncodeAll(out, generated)
+
+	return 0
+}
+
+func generate(hashes []string, delay int) (*gif.GIF, error) {
+	output := &gif.GIF{}
 	for i, hash := range hashes {
 		fmt.Printf("Generating... %d %%\r", int(float32(i)/float32(len(hashes))*100))
 
-		f, err := os.OpenFile(filepath.Join(".clip", hash), os.O_RDONLY, 0600)
+		f, err := os.OpenFile(filepath.Join(dir, hash), os.O_RDONLY, 0600)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return 1
+			return nil, err
+		}
+
+		tmp, err := png.Decode(f)
+		if err != nil {
+			return nil, err
 		}
 
 		buf := bytes.Buffer{}
-		tmp, err := png.Decode(f)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return 1
-		}
-
 		gif.Encode(&buf, tmp, nil)
 
 		input, err := gif.Decode(&buf)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
-			return 1
+			return nil, err
 		}
 
 		// TODO: 関数に切り出してdefer
@@ -111,12 +130,7 @@ func (c *GifCommand) Run(args []string) int {
 
 	fmt.Println("Generating... done!")
 
-	f, _ := os.OpenFile(name, os.O_CREATE|os.O_WRONLY, 0600)
-	defer f.Close()
-
-	gif.EncodeAll(f, output)
-
-	return 0
+	return output, nil
 }
 
 func reverse(s []string) []string {
