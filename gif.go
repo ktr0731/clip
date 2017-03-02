@@ -1,10 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"image"
+	"image/color/palette"
+	"image/draw"
 	"image/gif"
 	"image/png"
 	"io/ioutil"
@@ -99,7 +100,7 @@ func generate(dir string, hashes []string, delay int) (*gif.GIF, error) {
 	for i, hash := range hashes {
 		fmt.Printf("Generating... %d %%\r", int(float32(i)/float32(len(hashes))*100))
 
-		f, err := os.OpenFile(filepath.Join(dir, hash), os.O_RDONLY, 0600)
+		f, err := os.Open(filepath.Join(dir, hash))
 		if err != nil {
 			return nil, err
 		}
@@ -109,18 +110,12 @@ func generate(dir string, hashes []string, delay int) (*gif.GIF, error) {
 			return nil, err
 		}
 
-		buf := bytes.Buffer{}
-		gif.Encode(&buf, tmp, nil)
+		paletted := image.NewPaletted(tmp.Bounds(), palette.WebSafe)
+		draw.FloydSteinberg.Draw(paletted, tmp.Bounds(), tmp, image.ZP)
 
-		input, err := gif.Decode(&buf)
-		if err != nil {
-			return nil, err
-		}
-
-		// TODO: 関数に切り出してdefer
 		f.Close()
 
-		output.Image = append(output.Image, input.(*image.Paletted))
+		output.Image = append(output.Image, paletted)
 		output.Delay = append(output.Delay, delay/10)
 	}
 
