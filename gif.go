@@ -41,6 +41,7 @@ func (c *GifCommand) Run(args []string) int {
 
 	if delay < 0 {
 		fmt.Fprintln(os.Stderr, "Invalid delay time")
+		return 1
 	}
 
 	output := &gif.GIF{}
