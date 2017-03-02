@@ -26,6 +26,8 @@ func (c *GifCommand) Help() string {
 }
 
 func (c *GifCommand) Run(args []string) int {
+	dir := ".clip"
+
 	var name string
 	var delay int
 	var all bool
@@ -33,12 +35,6 @@ func (c *GifCommand) Run(args []string) int {
 	flags.StringVar(&name, "output", "process.gif", "Output file name")
 	flags.IntVar(&delay, "delay", 1000, "Delay time (ms)")
 	flags.BoolVar(&all, "all", false, "Create pictures if there is no picture corresponding to commits")
-
-	// TODO: Specify the dir by flag
-	var dir string
-	if len(args) > 0 && args[0] != "" {
-		dir = args[0]
-	}
 
 	if err := flags.Parse(args); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -88,7 +84,7 @@ func (c *GifCommand) Run(args []string) int {
 	out, _ := os.OpenFile(name, os.O_CREATE|os.O_WRONLY, 0600)
 	defer out.Close()
 
-	generated, err := generate(hashes, delay)
+	generated, err := generate(dir, hashes, delay)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 1
@@ -98,7 +94,7 @@ func (c *GifCommand) Run(args []string) int {
 	return 0
 }
 
-func generate(hashes []string, delay int) (*gif.GIF, error) {
+func generate(dir string, hashes []string, delay int) (*gif.GIF, error) {
 	output := &gif.GIF{}
 	for i, hash := range hashes {
 		fmt.Printf("Generating... %d %%\r", int(float32(i)/float32(len(hashes))*100))

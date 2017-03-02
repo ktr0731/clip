@@ -102,6 +102,7 @@ func makeTempFile() (*os.File, func() error, error) {
 
 func seekSQLiteHeader(buf io.ByteReader) (int, error) {
 	// TODO: 最初のメタデータからデータ位置を特定したい
+	// image/pngの実装のようにする
 	header := []byte{
 		0x53, 0x51, 0x4c, 0x69, 0x74, 0x65, 0x20, 0x66, 0x6f, 0x72, 0x6d, 0x61, 0x74, 0x20, 0x33,
 	}
