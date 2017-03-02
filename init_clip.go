@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 // InitCommand creates .clip/ and update post-commit in .git/hooks/
@@ -17,21 +18,26 @@ func (c *InitCommand) Help() string {
 }
 
 func (c *InitCommand) Run(args []string) int {
+	const clipDir = ".clip"
+
 	if len(args) != 1 {
 		fmt.Fprintln(os.Stderr, c.Help())
 		return 1
 	}
-	if isExists(".clip/") {
+
+	if isExists(clipDir) && isDir(clipDir) {
 		fmt.Fprintln(os.Stderr, "Already initialized")
 		return 1
 	}
 
-	if !isExists(".git/hooks/") {
-		fmt.Fprintln(os.Stderr, ".git/hooks/ Not Found")
+	hooksPath := filepath.Join(".git", "hooks")
+	if !isExists(hooksPath) {
+		fmt.Fprintln(os.Stderr, hooksPath+" Not Found")
 		return 1
 	}
 
-	postCommit, err := os.OpenFile(".git/hooks/post-commit", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	postCommitPath := filepath.Join(hooksPath, "post-commit")
+	postCommit, err := os.OpenFile(postCommitPath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Cannot open post-commit: %s\n", err)
 		return 1
@@ -44,7 +50,7 @@ clip export %s $NAME`
 
 	postCommit.WriteString(fmt.Sprintf(string(data), args[0]))
 
-	fmt.Println("Updated .git/hooks/post-commit")
+	fmt.Println("Updated post-commit")
 
 	clipconfig, err := os.OpenFile(".clipconfig", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
@@ -65,7 +71,7 @@ clip export %s $NAME`
 	gitignore.WriteString("# Clip\n.clip")
 	fmt.Println("Updated .gitignore")
 
-	os.Chmod(".git/hooks/post-commit", 0755)
+	os.Chmod(postCommitPath, 0755)
 
 	return 0
 }

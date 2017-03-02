@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -14,9 +15,16 @@ func isExists(path string) bool {
 	return err == nil
 }
 
+// isDir checks whether the path is directory or not
+func isDir(path string) bool {
+	stat, err := os.Stat(path)
+
+	return err == nil && stat.IsDir()
+}
+
 // mkClipDir makes .clip directory
 func mkClipDir() {
-	os.Mkdir(".clip/", 0755)
+	os.Mkdir(".clip", 0755)
 	fmt.Println("Created .clip")
 }
 
@@ -31,7 +39,7 @@ func pickValidCommits() ([]string, error) {
 
 	var hashes []string
 	for _, hash := range tmp[:len(tmp)-1] {
-		if isExists(fmt.Sprintf(".clip/%s", hash)) {
+		if isExists(filepath.Join(".clip", hash)) {
 			hashes = append(hashes, hash)
 		}
 	}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/skratchdot/open-golang/open"
@@ -36,8 +37,9 @@ func (c *ShowCommand) Run(args []string) int {
 			hash = strings.TrimSpace(string(bytes))
 		}
 
-		if isExists(fmt.Sprintf(".clip/%s", hash)) {
-			open.Run(fmt.Sprintf(".clip/%s", hash))
+		path := filepath.Join(".clip", hash)
+		if isExists(path) {
+			open.Run(path)
 		} else {
 			fmt.Fprintln(os.Stderr, "Invalid hash")
 			return 1

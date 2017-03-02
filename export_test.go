@@ -3,13 +3,14 @@ package main
 import (
 	"bufio"
 	"os"
+	"path/filepath"
 	"testing"
 )
 
 func TestSeekSQLiteHeader(t *testing.T) {
 	expect := 3494297
 
-	f, err := os.Open("tests/assets/sample.clip")
+	f, err := os.Open(filepath.Join("tests", "assets", "sample.clip"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -35,7 +36,7 @@ func TestExtractSQLiteDB(t *testing.T) {
 	}
 	defer cleanup()
 
-	f, err := os.Open("tests/assets/sample.clip")
+	f, err := os.Open(filepath.Join("tests", "assets", "sample.clip"))
 	if err != nil {
 		t.Error(err)
 	}
@@ -67,7 +68,7 @@ func TestExtractIllustration(t *testing.T) {
 		}
 	}
 
-	f, err := os.Open("tests/assets/sample.clip")
+	f, err := os.Open(filepath.Join("tests", "assets", "sample.clip"))
 	if err != nil {
 		t.Error(err)
 	}

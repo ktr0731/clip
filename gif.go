@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -43,7 +44,6 @@ func (c *GifCommand) Run(args []string) int {
 	}
 
 	output := &gif.GIF{}
-	path := ".clip/%s"
 
 	if all {
 		_target, err := ioutil.ReadFile(".clipconfig")
@@ -62,7 +62,7 @@ func (c *GifCommand) Run(args []string) int {
 
 		export := &ExportCommand{}
 		for _, hash := range strings.Split(string(result), "\n") {
-			if !isExists(fmt.Sprintf(path, hash)) {
+			if !isExists(filepath.Join(".clip", hash)) {
 				if status := export.Run([]string{target, hash}); status != 0 {
 					fmt.Fprintln(os.Stderr, err)
 					return 1
@@ -80,7 +80,7 @@ func (c *GifCommand) Run(args []string) int {
 	for i, hash := range hashes {
 		fmt.Printf("Generating... %d %%\r", int(float32(i)/float32(len(hashes))*100))
 
-		f, err := os.OpenFile(fmt.Sprintf(path, hash), os.O_RDONLY, 0600)
+		f, err := os.OpenFile(filepath.Join(".clip", hash), os.O_RDONLY, 0600)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			return 1
