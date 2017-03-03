@@ -20,7 +20,7 @@ func (c *ExportCommand) Synopsis() string {
 }
 
 func (c *ExportCommand) Help() string {
-	return "Usage: clip export CLIP_STUDIO_FILE IMG_NAME"
+	return "Usage: clip export <CLIP STUDIO PAINT file> <image name>"
 }
 
 func (c *ExportCommand) Run(args []string) int {

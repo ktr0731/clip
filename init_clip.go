@@ -14,7 +14,7 @@ func (c *InitCommand) Synopsis() string {
 }
 
 func (c *InitCommand) Help() string {
-	return "Usage: clip init TARGET_FILE"
+	return "Usage: clip init <target CLIP STUDIO PAINT file>"
 }
 
 func (c *InitCommand) Run(args []string) int {

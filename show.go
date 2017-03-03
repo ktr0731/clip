@@ -18,7 +18,7 @@ func (c *ShowCommand) Synopsis() string {
 }
 
 func (c *ShowCommand) Help() string {
-	return "Usage: clip show [commit-hash ...]"
+	return "Usage: clip show [commit hash ...]"
 }
 
 func (c *ShowCommand) Run(args []string) int {
