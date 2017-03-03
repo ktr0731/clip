@@ -97,6 +97,8 @@ func (c *GifCommand) Run(args []string) int {
 
 func generate(dir string, hashes []string, delay int) (*gif.GIF, error) {
 	output := &gif.GIF{}
+	output.Image = make([]*image.Paletted, len(hashes))
+	output.Delay = make([]int, len(hashes))
 	for i, hash := range hashes {
 		fmt.Printf("Generating... %d %%\r", int(float32(i)/float32(len(hashes))*100))
 
@@ -115,8 +117,8 @@ func generate(dir string, hashes []string, delay int) (*gif.GIF, error) {
 
 		f.Close()
 
-		output.Image = append(output.Image, paletted)
-		output.Delay = append(output.Delay, delay/10)
+		output.Image[i] = paletted
+		output.Delay[i] = delay / 10
 	}
 
 	fmt.Println("Generating... done!")
