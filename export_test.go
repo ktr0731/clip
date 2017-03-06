@@ -5,6 +5,8 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/mitchellh/cli"
 )
 
 func TestSeekSQLiteHeader(t *testing.T) {
@@ -34,7 +36,7 @@ func TestExtractSQLiteDB(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer cleanup()
+	defer cleanup(&cli.BasicUi{Writer: os.Stdout, ErrorWriter: os.Stderr})
 
 	f, err := os.Open(filepath.Join("tests", "assets", "sample.clip"))
 	if err != nil {
@@ -60,7 +62,7 @@ func TestExtractIllustration(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer cleanup()
+	defer cleanup(&cli.BasicUi{Writer: os.Stdout, ErrorWriter: os.Stderr})
 
 	if !isExists(".clip") {
 		if err := os.Mkdir(".clip", 0755); err != nil {
