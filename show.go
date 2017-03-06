@@ -2,16 +2,18 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
+	"github.com/mitchellh/cli"
 	"github.com/skratchdot/open-golang/open"
 )
 
 // ShowCommand shows illustrations by commit hashes
-type ShowCommand struct{}
+type ShowCommand struct {
+	ui cli.Ui
+}
 
 func (c *ShowCommand) Synopsis() string {
 	return "Show illustrations from commit hashes"
@@ -23,7 +25,7 @@ func (c *ShowCommand) Help() string {
 
 func (c *ShowCommand) Run(args []string) int {
 	if len(args) == 0 {
-		fmt.Fprintln(os.Stderr, c.Help())
+		c.ui.Error(c.Help())
 		return 1
 	}
 
@@ -31,7 +33,7 @@ func (c *ShowCommand) Run(args []string) int {
 		if strings.Contains(hash, "HEAD") {
 			bytes, err := exec.Command("git", "rev-parse", hash).Output()
 			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
+				c.ui.Error(fmt.Sprint(err))
 				return 1
 			}
 			hash = strings.TrimSpace(string(bytes))
@@ -41,7 +43,7 @@ func (c *ShowCommand) Run(args []string) int {
 		if isExists(path) {
 			open.Run(path)
 		} else {
-			fmt.Fprintln(os.Stderr, "Invalid hash")
+			c.ui.Error(fmt.Sprintf("Invalid hash: %s\n", hash))
 			return 1
 		}
 	}

@@ -13,10 +13,14 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+
+	"github.com/mitchellh/cli"
 )
 
 // GifCommand generates the gif of the production process from all pictures
-type GifCommand struct{}
+type GifCommand struct {
+	ui cli.Ui
+}
 
 func (c *GifCommand) Synopsis() string {
 	return "Generate Gif of the production process"
@@ -42,12 +46,12 @@ func (c *GifCommand) Run(args []string) int {
 	flags.BoolVar(&all, "all", false, "Create pictures if there is no picture corresponding to commits")
 
 	if err := flags.Parse(args); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		c.ui.Error(fmt.Sprint(err))
 		return 1
 	}
 
 	if delay < 0 {
-		fmt.Fprintln(os.Stderr, "Invalid delay time")
+		c.ui.Error("Invalid delay time")
 		return 1
 	}
 
@@ -55,7 +59,7 @@ func (c *GifCommand) Run(args []string) int {
 	if all {
 		_target, err := ioutil.ReadFile(".clipconfig")
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			c.ui.Error(fmt.Sprint(err))
 			return 1
 		}
 
@@ -63,7 +67,7 @@ func (c *GifCommand) Run(args []string) int {
 
 		result, err := exec.Command("git", "rev-list", "--all").Output()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			c.ui.Error(fmt.Sprint(err))
 			return 1
 		}
 
@@ -74,7 +78,7 @@ func (c *GifCommand) Run(args []string) int {
 			}
 
 			if status := export.Run([]string{target, hash}); status != 0 {
-				fmt.Fprintf(os.Stderr, "cannot export %s@%s\n", target, hash)
+				c.ui.Error(fmt.Sprintf("cannot export %s@%s\n", target, hash))
 				return 1
 			}
 		}
@@ -82,7 +86,7 @@ func (c *GifCommand) Run(args []string) int {
 
 	hashes, err := pickValidCommits()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		c.ui.Error(fmt.Sprint(err))
 		return 1
 	}
 
@@ -91,7 +95,7 @@ func (c *GifCommand) Run(args []string) int {
 
 	generated, err := generate(dir, hashes, delay)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		c.ui.Error(fmt.Sprint(err))
 		return 1
 	}
 	gif.EncodeAll(out, generated)

@@ -10,10 +10,13 @@ import (
 	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/mitchellh/cli"
 )
 
 // ExportCommand creates image file from CLIP STUDIO file
-type ExportCommand struct{}
+type ExportCommand struct {
+	ui cli.Ui
+}
 
 func (c *ExportCommand) Synopsis() string {
 	return "Export an illustration from latest .clip file"
@@ -25,16 +28,16 @@ func (c *ExportCommand) Help() string {
 
 func (c *ExportCommand) Run(args []string) int {
 	if len(args) != 2 {
-		fmt.Fprintln(os.Stderr, c.Help())
+		c.ui.Error(c.Help())
 		return 1
 	}
 
 	tempFile, cleanup, err := makeTempFile()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		c.ui.Error(fmt.Sprint(err))
 		return 1
 	}
-	defer cleanup()
+	defer cleanup(c.ui)
 
 	clipFileName := args[0]
 	outputFileName := args[1]
@@ -44,13 +47,13 @@ func (c *ExportCommand) Run(args []string) int {
 	}
 
 	if !isExists(clipFileName) {
-		fmt.Fprintf(os.Stderr, "%s: no such file\n", clipFileName)
+		c.ui.Error(fmt.Sprintf("%s: no such file\n", clipFileName))
 		return 1
 	}
 
 	f, err := os.Open(clipFileName)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		c.ui.Error(fmt.Sprint(err))
 		return 1
 	}
 	defer f.Close()
@@ -58,42 +61,42 @@ func (c *ExportCommand) Run(args []string) int {
 	buf := bufio.NewReader(f)
 	i, err := seekSQLiteHeader(buf)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		c.ui.Error(fmt.Sprint(err))
 		return 1
 	}
 
 	stat, err := f.Stat()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		c.ui.Error(fmt.Sprint(err))
 	}
 
 	if err := extractSQLiteDB(tempFile, f, int64(i), stat.Size()); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		c.ui.Error(fmt.Sprint(err))
 		return 1
 	}
 
 	if err := extractIllustration(tempFile.Name(), outputFileName); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		c.ui.Error(fmt.Sprint(err))
 		return 1
 	}
 
 	return 0
 }
 
-func makeTempFile() (*os.File, func() error, error) {
+func makeTempFile() (*os.File, func(ui cli.Ui) error, error) {
 	f, err := ioutil.TempFile("", "clip")
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return f, func() error {
+	return f, func(ui cli.Ui) error {
 		if err := f.Close(); err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			ui.Error(fmt.Sprintf("Cannot close %s: %s\n", f.Name(), err))
 			return err
 		}
 
 		if err := os.Remove(f.Name()); err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			ui.Error(fmt.Sprintf("Cannot remove %s: %s\n", f.Name(), err))
 			return err
 		}
 		return nil
