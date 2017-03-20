@@ -107,8 +107,13 @@ func generate(dir string, hashes []string, delay int) (*gif.GIF, error) {
 	output := &gif.GIF{}
 	output.Image = make([]*image.Paletted, len(hashes))
 	output.Delay = make([]int, len(hashes))
+
 	for i, hash := range hashes {
 		fmt.Printf("Generating... %d %%\r", int(float32(i)/float32(len(hashes))*100))
+
+		if strings.TrimSpace(hash) == "" {
+			continue
+		}
 
 		f, err := os.Open(filepath.Join(dir, hash))
 		if err != nil {
